@@ -1,12 +1,19 @@
-
 name: Build tvhome APK
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/build.yml'
+      - 'tvhome-main.zip'
+
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -17,8 +24,8 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
 
       - name: Extract project
         run: |
@@ -30,11 +37,11 @@ jobs:
       - name: Build APK
         run: |
           cd tvhome-main
-          ./gradlew --no-daemon :app:assembleRelease
+          ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: tvhome-release-apk
-          path: tvhome-main/app/build/outputs/apk/release/app-release.apk
-          
+          name: tvhome-debug-apk
+          path: tvhome-main/**/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
