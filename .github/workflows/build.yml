@@ -1,5 +1,5 @@
 
-name: Build tvhome APK
+name: Build tvhome APk
 on:
   workflow_dispatch:
 jobs:
