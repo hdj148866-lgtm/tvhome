@@ -1,47 +1,33 @@
-name: Build tvhome APK
+name: Build TV Launcher APK
 
 on:
-  workflow_dispatch:
   push:
-    paths:
-      - '.github/workflows/build.yml'
-      - 'tvhome-main.zip'
-
-permissions:
-  contents: read
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Set up Java 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v4
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
 
-      - name: Extract project
-        run: |
-          unzip -q tvhome-main.zip
-          cd tvhome-main
-          printf 'sdk.dir=%s\n' "$ANDROID_HOME" > local.properties
-          chmod +x gradlew
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug
 
-      - name: Build APK
-        run: |
-          cd tvhome-main
-          ./gradlew assembleDebug --stacktrace
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: tvhome-debug-apk
-          path: tvhome-main/**/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: TV-Launcher-APK
+        path: app/build/outputs/apk/debug/app-debug.apk
